@@ -16,7 +16,7 @@ public class Correlation {
             
             //1000-20
             contClass = 1000;
-           // generetaFiles(contClass, contClass/50);
+            generetaFiles(contClass, contClass/50);
             
             //1000-100
             contClass = 1000;
@@ -31,42 +31,12 @@ public class Correlation {
            // generetaFiles(contClass, contClass/50);
             
             //to see more about gaussian number generated, open this link: http://www.javamex.com/tutorials/random_numbers/gaussian_distribution_2.shtml
-           // Correlation.testGaussianNumberGenerate(0,15,15,30,45);
-            //Correlation.testGaussianNumberGenerate(0,100,90,160,210);//115,125,145,170
-            
-            //CORRELAÇÃO
-            int cont0 = 0, cont1 = 0, cont3 = 0, cont9 = 0;
-            for(int i = 0; i < 100; i++){
-            	double generateGaussianNumber = generateGaussianNumber(0, 100);
-            	if(generateGaussianNumber >= 210){
-            		cont9++;
-            	}else if(generateGaussianNumber >= 160){
-            		cont3++;
-            	}else if(generateGaussianNumber >= 90){
-            		cont1++;
-            	}else{
-            		cont0++;
-            	}
-            }
-            System.out.println(cont0+" - "+cont1+" - "+cont3+" - "+cont9);
-            
-            //TESTE
-            int countContainsCoverage = 0;
-            for(int i = 0; i < 5000; i++){
-            	double generateGaussianNumber = generateGaussianNumber(0, 30);
-            	if(generateGaussianNumber >= 60){
-            		countContainsCoverage++;
-            		generateGaussianNumber = generateGaussianNumber < 100 ? generateGaussianNumber : 100; 
-            		System.out.println(generateGaussianNumber);
-            	}
-            }
-            System.out.println("--"+countContainsCoverage+"--");
-            
+           //Correlation.testGaussianNumberGenerate(0,15,15,30,45);      
     }
     
     public static void generetaFiles(int contClass, int reqCount) throws IOException{
             generateSQFD(contClass, reqCount, 5, BASE_FOLDER + "SQFD-cl-"+contClass+"-req-"+reqCount+".csv");
-            generateTest(contClass, reqCount, BASE_FOLDER + "TestCoverage-cl-"+contClass+"-req-"+reqCount+".csv", 5, 0.3, 1);
+            generateTest(contClass, reqCount, BASE_FOLDER + "TestCoverage-cl-"+contClass+"-req-"+reqCount+".csv");
             generateCoupling(contClass, BASE_FOLDER + "Coupling-cl-"+contClass+".csv");
     }
     
@@ -92,52 +62,56 @@ public class Correlation {
     }
 
     public static void generateSQFD(int numberOfClass, int numberOfRequirement, int countClient, String addressFile) throws IOException{
-            Integer[] correlation = { 0, 0, 0, 0, 0, 1, 1, 1, 3, 3, 9 };
-            Random random = new Random();
-            String[] stringLine;
-            List<String[]> data = new ArrayList<String[]>();
             
-            CSVWriter writer = new CSVWriter(new FileWriter(addressFile), ';');
-            
-            //add 2 to generate client priority column and description
-            numberOfClass += 1 + countClient;
-            //add 1 to generate description
-            numberOfRequirement++;
-            
-            //each line
-            for(int req = 0; req < numberOfRequirement; req++){
-                    stringLine = new String[numberOfClass];
-                    //each column
-                    for(int clas = 0; clas < numberOfClass; clas++){
-                            //title of first row
-                            if(req==0){
-                                    if(clas==0){
-                                            stringLine[clas] = "Requirement\\Class";
-                                    }else if(clas < numberOfClass-countClient){
-                                            stringLine[clas] = "Class["+clas+"]";
-                                    }else{
-                                            stringLine[clas] = "Client Priority";
-                                    }
-                            }else{
-                                    //title of row
-                                    if(clas==0){
-                                            stringLine[clas] = "Requirement["+req+"]";
-                                    }else if(clas < numberOfClass-countClient){
-                                            stringLine[clas] = correlation[random.nextInt(correlation.length)].toString();
-                                    }else{
-                                            stringLine[clas] = new Integer(random.nextInt(11)).toString();
-                                    }
-                                    
-                            }
-                    }
-                    data.add(stringLine);
-            }
-            
-            writer.writeAll(data);
-            writer.close();
+    	int cont9 = 220, cont3 = 170, cont1 = 90;
+    	double gaussian;
+    	
+        Random random = new Random();
+        String[] stringLine;
+        List<String[]> data = new ArrayList<String[]>();
+        
+        CSVWriter writer = new CSVWriter(new FileWriter(addressFile), ';');
+        
+        //add 2 to generate client priority column and description
+        numberOfClass += 1 + countClient;
+        //add 1 to generate description
+        numberOfRequirement++;
+        
+        //each line
+        for(int req = 0; req < numberOfRequirement; req++){
+                stringLine = new String[numberOfClass];
+                //each column
+                for(int clas = 0; clas < numberOfClass; clas++){
+                        //title of first row
+                        if(req==0){
+                                if(clas==0){
+                                        stringLine[clas] = "Requirement\\Class";
+                                }else if(clas < numberOfClass-countClient){
+                                        stringLine[clas] = "Class["+clas+"]";
+                                }else{
+                                        stringLine[clas] = "Client Priority";
+                                }
+                        }else{
+                                //title of row
+                                if(clas==0){
+                                        stringLine[clas] = "Requirement["+req+"]";
+                                }else if(clas < numberOfClass-countClient){
+                                	gaussian = generateGaussianNumber(0, 100);
+                                        stringLine[clas] = gaussian >= cont9 ? "9" : (gaussian >= cont3 ? "3" : (gaussian >= cont1 ? "1" : "0"));
+                                }else{
+                                        stringLine[clas] = new Integer(random.nextInt(11)).toString();
+                                }
+                                
+                        }
+                }
+                data.add(stringLine);
+        }
+        
+        writer.writeAll(data);
+        writer.close();
     }
     
-    public static void generateTest(int numberOfClass, int numberOfTests, String addressFile, double percentClassCoverageChance, double minCoverage, double maxCoverage) throws IOException{
+    public static void generateTest(int numberOfClass, int numberOfTests, String addressFile) throws IOException{
             Random random = new Random();
             String[] stringLine;
             List<String[]> data = new ArrayList<String[]>();
@@ -172,17 +146,19 @@ public class Correlation {
                                     //title of row
                                     if(clas==0){
                                             stringLine[clas] = "Test["+test+"]";
-                                    }else if(clas < numberOfClass-1){
-                                            //depending on the percentage, simulate coverage
-                                            if(random.nextDouble() * 100 <= percentClassCoverageChance){
-                                                    coverage = new Double(minCoverage + (maxCoverage - minCoverage) * random.nextDouble());
-                                                    stringLine[clas] = String.format("%.4f", coverage);
-                                                    countCoverage += coverage;
-                                            }else{
-                                                    stringLine[clas] = "0";
-                                            }
                                     }else{
-                                            stringLine[clas] = String.format("%.4f", (new Double(minTemp + (maxTemp - minTemp) * random.nextDouble())) * countCoverage );
+                                    	if(clas < numberOfClass-1){
+                                    		coverage = generateGaussianNumber(0, 30);
+                                        	if(coverage >= 60){
+                                        		coverage = coverage < 100 ? coverage : 100; 
+                                        		stringLine[clas] = String.format("%.4f", coverage);
+                                                countCoverage += coverage;
+                                        	}else{
+                                        		stringLine[clas] = "0";
+                                        	}
+                                    	}else{
+                                    		stringLine[clas] = String.format("%.4f", (new Double(minTemp + (maxTemp - minTemp) * random.nextDouble())) * countCoverage );
+                                    	}
                                     }
                             }
                     }
