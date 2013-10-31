@@ -31,18 +31,16 @@ public class Correlation {
            // generetaFiles(contClass, contClass/50);
             
             //to see more about gaussian number generated, open this link: http://www.javamex.com/tutorials/random_numbers/gaussian_distribution_2.shtml
-           //Correlation.testGaussianNumberGenerate(0,15,15,30,45);      
+           //Correlation.testGaussianNumberGenerate(0,15,15,30,45);           
     }
     
     public static void generetaFiles(int contClass, int reqCount) throws IOException{
-            generateSQFD(contClass, reqCount, 5, BASE_FOLDER + "SQFD-cl-"+contClass+"-req-"+reqCount+".csv");
-            generateTest(contClass, reqCount, BASE_FOLDER + "TestCoverage-cl-"+contClass+"-req-"+reqCount+".csv");
-            generateCoupling(contClass, BASE_FOLDER + "Coupling-cl-"+contClass+".csv");
+            generateSQFD(contClass, reqCount, 5, BASE_FOLDER + "New-SQFD-cl-"+contClass+"-req-"+reqCount+".csv");
+            generateTest(contClass, reqCount, BASE_FOLDER + "New-TestCoverage-cl-"+contClass+"-req-"+reqCount+".csv");
+            generateCoupling(contClass, BASE_FOLDER + "New-Coupling-cl-"+contClass+".csv");
     }
     
     private static void generateCoupling(int numberOfClass, String addressFile) throws IOException {
-            Random random = new Random();
-            
             List<String[]> data = new ArrayList<String[]>();
             CSVWriter writer = new CSVWriter(new FileWriter(addressFile), ';');
             /* Header */
@@ -53,8 +51,9 @@ public class Correlation {
             data.add(header);
             /* Body */
             String[] body = new String[numberOfClass];
+            List<Double> allImportanceValue = getAllNormalizedValues(numberOfClass, 10, 50, 15);
             for(int i = 0; i < numberOfClass; i++){
-                    body[i] = random.nextInt(11) + "";
+            	body[i] = String.format("%.0f", allImportanceValue.get(i));
             }
             data.add(body);
             writer.writeAll(data);
@@ -63,10 +62,6 @@ public class Correlation {
 
     public static void generateSQFD(int numberOfClass, int numberOfRequirement, int countClient, String addressFile) throws IOException{
             
-    	int cont9 = 220, cont3 = 170, cont1 = 90;
-    	double gaussian;
-    	
-        Random random = new Random();
         String[] stringLine;
         List<String[]> data = new ArrayList<String[]>();
         
@@ -75,13 +70,13 @@ public class Correlation {
         //add 2 to generate client priority column and description
         numberOfClass += 1 + countClient;
         //add 1 to generate description
-        numberOfRequirement++;
-        
+        numberOfRequirement++;        
         //each line
         for(int req = 0; req < numberOfRequirement; req++){
                 stringLine = new String[numberOfClass];
                 //each column
                 for(int clas = 0; clas < numberOfClass; clas++){
+                	List<Double> allImportanceValue = getAllNormalizedValues(numberOfClass, 10, 50, 15);
                         //title of first row
                         if(req==0){
                                 if(clas==0){
@@ -96,10 +91,9 @@ public class Correlation {
                                 if(clas==0){
                                         stringLine[clas] = "Requirement["+req+"]";
                                 }else if(clas < numberOfClass-countClient){
-                                	gaussian = generateGaussianNumber(0, 100);
-                                        stringLine[clas] = gaussian >= cont9 ? "9" : (gaussian >= cont3 ? "3" : (gaussian >= cont1 ? "1" : "0"));
+                                	stringLine[clas] = getCorrelationValue(0, 15);
                                 }else{
-                                        stringLine[clas] = new Integer(random.nextInt(11)).toString();
+                                	stringLine[clas] = String.format("%.0f", allImportanceValue.get(clas));
                                 }
                                 
                         }
@@ -148,14 +142,9 @@ public class Correlation {
                                             stringLine[clas] = "Test["+test+"]";
                                     }else{
                                     	if(clas < numberOfClass-1){
-                                    		coverage = generateGaussianNumber(0, 30);
-                                        	if(coverage >= 60){
-                                        		coverage = coverage < 100 ? coverage : 100; 
-                                        		stringLine[clas] = String.format("%.4f", coverage);
-                                                countCoverage += coverage;
-                                        	}else{
-                                        		stringLine[clas] = "0";
-                                        	}
+                                    		coverage = getTestValue(50, 20);
+                                    		countCoverage+=coverage;
+                                    		stringLine[clas] = String.format("%.4f", coverage);
                                     	}else{
                                     		stringLine[clas] = String.format("%.4f", (new Double(minTemp + (maxTemp - minTemp) * random.nextDouble())) * countCoverage );
                                     	}
@@ -169,39 +158,98 @@ public class Correlation {
             writer.close();
     }
     
-    public static void testGaussianNumberGenerate(int centerValue, int standardDeviation, int x1, int x2, int x3){
-        int inside15 = 0, inside30 = 0, inside45 = 0, count = 1000;
-        double maxval = 0, val;
-        for(int i = 0; i < count; i++){
-        	val = generateGaussianNumber(centerValue, standardDeviation);
-        	if(val <= x1){
-        		inside15++;
-        	}
-        	if(val <= x2){
-        		inside30++;
-        	}
-        	if(val <= x3){
-        		inside45++;
-        	}
-        	if(maxval<val){
-        		maxval = val;
-        	}
-        	System.out.println("val: "+val);
-        }
-        System.out.println("maxval: "+maxval+" in: "+count);
-        System.out.println(x1+": "+inside15+" - "+new Double(inside15)/(count/100));
-        System.out.println(x2+": "+inside30+" - "+new Double(inside30)/(count/100));
-        System.out.println(x3+": "+inside45+" - "+new Double(inside45)/(count/100));
+    /**
+     * Retorna todas as importancias normalizadas a partir da quantidade passada, do valor central e do desvio padrão 
+     * @param cont
+     * @param ctr
+     * @param std
+     * @return
+     */
+    public static List<Double> getAllNormalizedValues(int cont, int maximum, int ctr, int std){
+    	List<Double> list = new ArrayList<Double>();
+    	double max = Integer.MIN_VALUE, atual;
+    	for(int i = 0; i < cont; i++){
+    		atual = generateGaussianNumber(ctr, std, false);
+    		if(atual > max){
+    			max = atual;
+    		}
+    		list.add(atual);
+    	}
+    	
+    	List<Double> finalList = new ArrayList<Double>();
+    	for (Double d : list) {
+    		finalList.add((d/max) * maximum);
+		}
+    	return finalList;
     }
     
-    public static double generateGaussianNumber(int centerValue, int standardDeviation){
+    /**
+     * Retorna o valor da cobertura do teste
+     * @param ctr
+     * @param std
+     * @return
+     */
+    public static Double getTestValue(int ctr, int std){
+    	double coverage = generateGaussianNumber(ctr, std, false);
+		coverage = coverage < 0 ? 0 : coverage;
+		coverage = coverage > 100 ? 100 : coverage;
+		return coverage;
+    }
+    
+    /**
+     * Retorn o valor da correlação a partir do valor central e do desvio padrão.
+     * @param ctr
+     * @param std
+     * @return
+     */
+    public static String getCorrelationValue(int ctr, int std){
+    	double val = generateGaussianNumber(ctr, std, false);
+    	String retorno;
+    	if(val > ctr - std && val < ctr + std){
+    		retorno = "0";
+    	}else if(val >= ctr + std && val < ctr + (2*std)){
+    		retorno = "1";
+    	}else if(val <= ctr - std && val > ctr - (2*std)){
+    		retorno = "3";
+    	}else{
+    		retorno = "9";
+    	}
+    	return retorno;
+    }
+    
+    
+    public static double generateGaussianNumber(int centerValue, int standardDeviation, boolean invert){
     	Random random = new Random();
     	double val, dif;
     	val = random.nextGaussian() * standardDeviation + centerValue;
     	dif = (centerValue-val);
     	//generate values larger than centerValue
-    	dif = dif < 0 ? -dif : dif;
+    	if(invert){
+    		dif = dif < 0 ? -dif : dif;
+    	}
     	val = centerValue + dif;
     	return val;
     }
+    
+    public static int getPoisson(double lambda) {
+    	  double L = Math.exp(-lambda);
+    	  double p = 1.0;
+    	  int k = 0;
+
+    	  do {
+    	    k++;
+    	    p *= Math.random();
+    	  } while (p > L);
+
+    	  return k - 1;
+    	}
+    
+    public static int getBinomial(int n, double p) {
+		  int x = 0;
+		  for(int i = 0; i < n; i++) {
+		    if(Math.random() < p)
+		      x++;
+		  }
+		  return x;
+		}
 }
