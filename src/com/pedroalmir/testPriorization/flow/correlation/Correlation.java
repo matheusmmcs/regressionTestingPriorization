@@ -9,14 +9,14 @@ import java.util.Random;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class Correlation {
-	private final static String BASE_FOLDER = "C:/Eclipse/junojee/mestrado/regressionTestingPriorization/experimentos/";
+	private final static String BASE_FOLDER = "E:/Matheus/dadosGerados/";
     
     public static void main(String[] args) throws IOException {
             int contClass;
             
             //1000-20
             contClass = 1000;
-            generetaFiles(contClass, contClass/50);
+            //generetaFiles(contClass, contClass/50);
             
             //1000-100
             contClass = 1000;
@@ -24,14 +24,11 @@ public class Correlation {
             
             //5000-500
             contClass = 5000;
-           // generetaFiles(contClass, contClass/10);
+            generetaFiles(contClass, contClass/10);
             
             //10000-200
             contClass = 1000;
-           // generetaFiles(contClass, contClass/50);
-            
-            //to see more about gaussian number generated, open this link: http://www.javamex.com/tutorials/random_numbers/gaussian_distribution_2.shtml
-           //Correlation.testGaussianNumberGenerate(0,15,15,30,45);           
+            //generetaFiles(contClass, contClass/50);
     }
     
     public static void generetaFiles(int contClass, int reqCount) throws IOException{
@@ -75,8 +72,9 @@ public class Correlation {
         for(int req = 0; req < numberOfRequirement; req++){
                 stringLine = new String[numberOfClass];
                 //each column
+                List<Double> allImportanceValue = getAllNormalizedValues(numberOfClass, 10, 50, 15);
+            	List<Double> allCorrelationValues = getAllNormalizedValues(numberOfClass, 4, 50, 14);
                 for(int clas = 0; clas < numberOfClass; clas++){
-                	List<Double> allImportanceValue = getAllNormalizedValues(numberOfClass, 10, 50, 15);
                         //title of first row
                         if(req==0){
                                 if(clas==0){
@@ -91,7 +89,7 @@ public class Correlation {
                                 if(clas==0){
                                         stringLine[clas] = "Requirement["+req+"]";
                                 }else if(clas < numberOfClass-countClient){
-                                	stringLine[clas] = getCorrelationValue(0, 15);
+                                	stringLine[clas] = getCorrelationValue(allCorrelationValues.get(clas));
                                 }else{
                                 	stringLine[clas] = String.format("%.0f", allImportanceValue.get(clas));
                                 }
@@ -196,12 +194,27 @@ public class Correlation {
 		return coverage;
     }
     
+    public static String getCorrelationValue(double normalized){
+    	String retorno = "";
+    	if(normalized <= 1){
+    		retorno = "3";
+    	}else if(normalized > 1 && normalized <= 2){
+    		retorno = "0";
+    	}else if(normalized > 2 && normalized <= 3){
+    		retorno = "1";
+    	}else if(normalized > 3 && normalized <= 4){
+    		retorno = "9";
+    	}
+    	return retorno;
+    }
+    
     /**
      * Retorn o valor da correlação a partir do valor central e do desvio padrão.
      * @param ctr
      * @param std
      * @return
      */
+    @Deprecated
     public static String getCorrelationValue(int ctr, int std){
     	double val = generateGaussianNumber(ctr, std, false);
     	String retorno;
