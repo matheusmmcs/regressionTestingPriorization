@@ -1,7 +1,7 @@
 package com.pedroalmir.testPriorization.util.enums;
 
 public enum EnumJhmType {
-	CLASS_MAPPING("<class-mapping","class-mapping"), FLOW("<flow","flow"), REPORT("<report","report");
+	CLASS_MAPPING("<class-mapping","class-mapping"), FLOW("<flow","flow"), REPORT("<report","report"), TAG("<jheat-tag","jheat-tag");
 
 	private String xml;
 	private String description;

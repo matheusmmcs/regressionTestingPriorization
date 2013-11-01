@@ -23,11 +23,11 @@ import com.pedroalmir.testPriorization.util.file.MyDirectoryWalker;
  * 
  */
 public class RequirementExtractor {
-	private static final String MYPATH = "C:/Users/Infoway/workspaceIhelth/trunk_MAA/src/";
+	private static final String MYPATH = "C:\\Users\\Infoway\\workspaceIhelth\\trunk_MAA\\src\\main\\";
 	private static final String MYEXTENSION = ".jhm.xml";
 	private static final int MAXDEPTH = 100;
 	private static final String FILEADDRESS = "E:/Matheus/dadosGerados/requisitos/";
-	private static final String FILENAME = "RequisitosMAA.csv";
+	private static final String FILENAME = "RequisitosMAA_trunk_31_10_2013.csv";
 
 	/**
 	 * @param args
@@ -80,6 +80,8 @@ public class RequirementExtractor {
 				type = EnumJhmType.FLOW.getDescription();
 			} else if (content.contains(EnumJhmType.REPORT.getXml())) {
 				type = EnumJhmType.REPORT.getDescription();
+			} else if (content.contains(EnumJhmType.TAG.getXml())) {
+				type = EnumJhmType.TAG.getDescription();
 			}
 
 			/* Body */
